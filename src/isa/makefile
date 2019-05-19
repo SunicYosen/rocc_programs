@@ -1,27 +1,29 @@
 #Makefile for rocc cnn
+
 XLEN ?= 32
 NAME ?= rocc_cnn
-EXETYPE ?= rv$(XLEN)
-DUMPOUT ?= $(EXETYPE).dump
 
-CC = riscv$(XLEN)-unknown-elf-gcc
-CXX = riscv$(XLEN)-unknown-elf-g++
-OBJDUMP = riscv$(XLEN)-unknown-elf-objdump
-CCFLAGS := -static
+GCC ?= riscv$(XLEN)-unknown-elf-gcc
+OBJCOPY ?= riscv$(XLEN)-unknown-elf-objcopy
+OBJDUMP ?= riscv$(XLEN)-unknown-elf-objdump
 
-SRCDIR = .
-SRC = $(SRCDIR)/$(NAME).s
-SRCHEADER = $(SRCDIR)/$(NAME).h
+LINK := link.ld 
 
-default: $(NAME).$(EXETYPE)
+all: ${NAME}.rv$(XLEN) ${NAME}.bin$(XLEN) ${NAME}.hex$(XLEN) ${NAME}.dump$(XLEN)
 
-%.$(EXETYPE): $(SRCHEADER)
-	$(CC) $(SRC) $(CCFLAGS) -o $(NAME).$(EXETYPE)
+%.bin$(XLEN): %.rv$(XLEN)
+	$(OBJCOPY) -O binary --change-addresses=-0x80000000 --only-section .text $< $@
 
-dump: $(NAME).$(EXETYPE)
-	$(OBJDUMP) -D $(NAME).$(EXETYPE) > $(NAME).$(DUMPOUT)
+%.rv$(XLEN): %.S $(LINK)
+	$(GCC) -T$(LINK) $< -nostdlib -static -o $@
+
+%.dump$(XLEN): %.rv$(XLEN)
+	$(OBJDUMP) -d $< > $@
+
+%.hex$(XLEN): %.bin$(XLEN)
+	xxd -e $< | xxd -r | xxd -ps | tr -d  "\n" | sed "s/$$/ffffffff/" > $@
 
 .PHONY:clean
 
 clean:
-	rm *.${EXETYPE} *.${DUMPOUT}
+	rm ${NAME}.hex$(XLEN) ${NAME}.bin$(XLEN) ${NAME}.dump$(XLEN) ${NAME}.rv$(XLEN)

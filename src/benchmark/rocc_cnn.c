@@ -29,7 +29,8 @@ int main()
   rocc_read(is_issue_flag, IS_ISSUE_FLAG, GET_FLAG);
   while(!is_issue_flag)
   {
-    rocc_read(is_issue_flag, IS_ISSUE_FLAG, GET_FLAG);    
+    rocc_read(is_issue_flag, IS_ISSUE_FLAG, GET_FLAG); 
+    printf("[+] is_issue: %d", is_issue_flag);
   }
   rocc_write(issue_statue, rs1_value, r0, SEND_DATA);
 

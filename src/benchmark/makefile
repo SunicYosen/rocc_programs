@@ -15,7 +15,7 @@ SRCHEADER = $(SRCDIR)/$(NAME).h
 
 default: $(NAME).$(EXETYPE)
 
-%.$(EXETYPE): $(SRCHEADER)
+%.$(EXETYPE): $(SRCHEADER) $(SRC)
 	$(CC) -C $(SRC) $(CCFLAGS) -o $(NAME).$(EXETYPE)
 
 dump: $(NAME).$(EXETYPE)
