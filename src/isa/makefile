@@ -1,29 +1,35 @@
 #Makefile for rocc cnn
 
-XLEN ?= 32
-NAME ?= rocc_cnn
+XLEN     ?= 64
+NAME     ?= rocc_cnn
+CODETYPE ?= isa
 
-GCC ?= riscv$(XLEN)-unknown-elf-gcc
+GCC     ?= riscv$(XLEN)-unknown-elf-gcc
 OBJCOPY ?= riscv$(XLEN)-unknown-elf-objcopy
 OBJDUMP ?= riscv$(XLEN)-unknown-elf-objdump
 
+EXETYPE  := $(CODETYPE).rv$(XLEN)
+BINTYPE  := $(CODETYPE).bin$(XLEN)
+DUMPTYPE := $(CODETYPE).dump$(XLEN)
+HEXTYPE  := $(CODETYPE).hex$(XLEN)
+
 LINK := link.ld 
 
-all: ${NAME}.rv$(XLEN) ${NAME}.bin$(XLEN) ${NAME}.hex$(XLEN) ${NAME}.dump$(XLEN)
+all: ${NAME}.$(EXETYPE) ${NAME}.$(BINTYPE) ${NAME}.$(HEXTYPE) ${NAME}.$(DUMPTYPE)
 
-%.bin$(XLEN): %.rv$(XLEN)
+%.$(BINTYPE): %.$(EXETYPE)
 	$(OBJCOPY) -O binary --change-addresses=-0x80000000 --only-section .text $< $@
 
-%.rv$(XLEN): %.S $(LINK)
+%.$(EXETYPE): %.S $(LINK)
 	$(GCC) -T$(LINK) $< -nostdlib -static -o $@
 
-%.dump$(XLEN): %.rv$(XLEN)
+%.$(DUMPTYPE): %.$(EXETYPE)
 	$(OBJDUMP) -d $< > $@
 
-%.hex$(XLEN): %.bin$(XLEN)
+%.$(HEXTYPE): %.$(BINTYPE)
 	xxd -e $< | xxd -r | xxd -ps | tr -d  "\n" | sed "s/$$/ffffffff/" > $@
 
 .PHONY:clean
 
 clean:
-	rm ${NAME}.hex$(XLEN) ${NAME}.bin$(XLEN) ${NAME}.dump$(XLEN) ${NAME}.rv$(XLEN)
+	rm -f ${NAME}.$(EXETYPE) ${NAME}.$(BINTYPE) ${NAME}.$(DUMPTYPE) ${NAME}.$(HEXTYPE)

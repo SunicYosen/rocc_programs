@@ -1,5 +1,5 @@
 #Makefile for rocc cnn
-XLEN ?= 32
+XLEN ?= 64
 NAME ?= rocc_cnn
 EXETYPE ?= rv$(XLEN)
 DUMPOUT ?= $(EXETYPE).dump
