@@ -24,4 +24,4 @@ dump: $(NAME).$(EXETYPE)
 .PHONY:clean
 
 clean:
-	rm *.${EXETYPE} *.${DUMPOUT}
+	rm -f *.${EXETYPE} *.${DUMPOUT}
